@@ -39,6 +39,8 @@ public class AutoRunFragment extends Fragment {
     private ClockManager clockManager;
     private AudioTest toTearDown; // TODO: figure out a better way to destroy the engine
 
+    private Experiment currentExperiment;
+
     private class AudioResultHandler implements ResultHandler {
         private FileWriter fileWriter;
 
@@ -81,6 +83,9 @@ public class AutoRunFragment extends Fragment {
     }
 
     private void doTest(@NonNull Bundle args) {
+        if (currentExperiment != null) {
+            currentExperiment.end();
+        }
         final int reps = args.getInt("Reps", 10);
         String fileName = args.getString("FileName", null);
         ResultHandler r = null;
@@ -98,9 +103,9 @@ public class AutoRunFragment extends Fragment {
                 clockManager.registerConnectCallback(new Runnable() {
                     @Override
                     public void run() {
-                        MidiTest midiTest = new MidiTest(getContext(), resultHandler);
-                        midiTest.setInputRepetitions(reps);
-                        midiTest.testMidiIn();
+                        currentExperiment = new MidiInputTest(getContext(), resultHandler);
+                        currentExperiment.setRepetitions(reps);
+                        currentExperiment.run();
                     }
                 });
                 break;
@@ -109,9 +114,9 @@ public class AutoRunFragment extends Fragment {
                 clockManager.registerConnectCallback(new Runnable() {
                     @Override
                     public void run() {
-                        MidiTest midiTest = new MidiTest(getContext(), resultHandler);
-                        midiTest.setOutputRepetitions(reps);
-                        midiTest.testMidiOut();
+                        currentExperiment = new MidiOutputTest(getContext(), resultHandler);
+                        currentExperiment.setRepetitions(reps);
+                        currentExperiment.run();
                     }
                 });
                 break;

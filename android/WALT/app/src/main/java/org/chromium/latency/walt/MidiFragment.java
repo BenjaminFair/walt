@@ -32,7 +32,7 @@ public class MidiFragment extends Fragment implements View.OnClickListener {
     private Activity activity;
     private SimpleLogger logger;
     private TextView mTextView;
-    private MidiTest mMidiTest;
+    private Experiment currentExperiment;
 
     public MidiFragment() {
         // Required empty public constructor
@@ -44,8 +44,6 @@ public class MidiFragment extends Fragment implements View.OnClickListener {
 
         activity = getActivity();
         logger = SimpleLogger.getInstance(getContext());
-
-        mMidiTest = new MidiTest(activity);
 
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_midi, container, false);
@@ -73,14 +71,21 @@ public class MidiFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
+        if (currentExperiment != null) {
+            currentExperiment.end();
+        }
         switch (v.getId()) {
             case R.id.button_start_midi_in:
-                mMidiTest.testMidiIn();
+                currentExperiment = new MidiInputTest(activity);
                 break;
             case R.id.button_start_midi_out:
-                mMidiTest.testMidiOut();
+                currentExperiment = new MidiOutputTest(activity);
                 break;
+            default:
+                logger.log("Unknown button pressed");
+                return;
         }
+        currentExperiment.run();
     }
 
     private BroadcastReceiver mLogReceiver = new BroadcastReceiver() {
